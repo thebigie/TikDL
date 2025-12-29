@@ -13,7 +13,7 @@ const formatDate = (timestamp?: number) => {
 };
 
 const calculateEngagement = (data: TikTokData['data']) => {
-  if (!data.play_count) return "0.0%";
+  if (!data.play_count || data.play_count === 0) return "N/A";
   const engagement = ((data.digg_count + data.comment_count + data.share_count) / data.play_count) * 100;
   return engagement.toFixed(1) + "%";
 };
@@ -27,8 +27,8 @@ const Toast = ({ message, onClose }: { message: string; onClose: () => void }) =
   }, [onClose]);
 
   return (
-    <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50 animate-fade-in-up">
-      <div className="glass px-6 py-3 rounded-full flex items-center gap-3 text-sm font-semibold shadow-[0_8px_30px_rgba(0,0,0,0.3)] bg-[#0f172a]/80 backdrop-blur-xl border border-cyan-500/30 text-cyan-50">
+    <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50 animate-fade-in-up w-auto max-w-[90vw]">
+      <div className="glass px-6 py-3 rounded-full flex items-center gap-3 text-sm font-semibold shadow-[0_8px_30px_rgba(0,0,0,0.4)] bg-[#0f172a]/90 backdrop-blur-xl border border-cyan-500/30 text-cyan-50 whitespace-nowrap">
         <i className="fa-solid fa-circle-check text-cyan-400"></i>
         {message}
       </div>
@@ -63,9 +63,9 @@ const DownloadButton = ({ href, icon, label, subLabel, primary = false }: any) =
     `}>
       <i className={`fa-solid ${icon}`}></i>
     </div>
-    <div className="flex flex-col text-left z-10">
-      <span className="font-bold text-base tracking-wide">{label}</span>
-      {subLabel && <span className={`text-xs ${primary ? 'text-cyan-50/80' : 'text-slate-400'} font-medium`}>{subLabel}</span>}
+    <div className="flex flex-col text-left z-10 min-w-0">
+      <span className="font-bold text-base tracking-wide truncate">{label}</span>
+      {subLabel && <span className={`text-xs ${primary ? 'text-cyan-50/80' : 'text-slate-400'} font-medium truncate block`}>{subLabel}</span>}
     </div>
     {/* Shine Effect */}
     <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 z-0"></div>
@@ -80,7 +80,10 @@ const App: React.FC = () => {
   const [toast, setToast] = useState<string | null>(null);
 
   const handleFetch = async () => {
-    if (!url) return;
+    if (!url) {
+      showToast("Please enter a link first");
+      return;
+    }
     setLoading(true);
     setError(null);
     setData(null);
@@ -89,7 +92,7 @@ const App: React.FC = () => {
       const result = await fetchTikTokData(url);
       setData(result.data);
     } catch (err: any) {
-      setError(err.message || "Failed to load video. Is the link valid?");
+      setError(err.message || "Failed to load video. Please check the link.");
     } finally {
       setLoading(false);
     }
@@ -101,8 +104,14 @@ const App: React.FC = () => {
       setUrl(text);
       showToast("Link pasted!");
     } catch (err) {
-      showToast("Allow clipboard access to paste");
+      showToast("Click 'Allow' to paste");
     }
+  };
+
+  const reset = () => {
+    setData(null);
+    setUrl('');
+    setError(null);
   };
 
   const copyCaption = () => {
@@ -115,56 +124,59 @@ const App: React.FC = () => {
   const showToast = (msg: string) => setToast(msg);
 
   return (
-    <div className="min-h-screen pb-20 relative flex flex-col font-outfit">
+    <div className="min-h-screen pb-10 relative flex flex-col font-outfit">
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
       {/* Navbar */}
       <nav className="border-b border-white/5 bg-[#020617]/70 backdrop-blur-xl sticky top-0 z-50 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => { setData(null); setUrl(''); }}>
-            {/* Logo Image Replacement */}
-            <img 
-              src="./tikdl-frozen-logo.png" 
-              alt="TikDL Pro" 
-              className="h-12 md:h-[60px] w-auto object-contain drop-shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_25px_rgba(34,211,238,0.4)]"
-            />
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={reset}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:rotate-12 transition-transform duration-300 relative overflow-hidden">
+               {/* Subtle shine on logo */}
+               <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+               <i className="fa-brands fa-tiktok text-white text-xl drop-shadow-md"></i>
+            </div>
+            <span className="font-bold text-2xl tracking-tight text-white select-none">
+              Tik<span className="text-cyan-400">DL</span>
+            </span>
           </div>
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
-             <a href="#features" className="hover:text-cyan-400 transition-colors hover:shadow-[0_0_10px_rgba(34,211,238,0.2)]">Features</a>
-             <a href="#about" className="hover:text-cyan-400 transition-colors hover:shadow-[0_0_10px_rgba(34,211,238,0.2)]">About</a>
+          
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+             <a href="#" className="hover:text-cyan-400 transition-colors">How it works</a>
+             <a href="#" className="hover:text-cyan-400 transition-colors">FAQ</a>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-4 pt-16 md:pt-24 flex-grow w-full relative z-10">
+      <main className="max-w-6xl mx-auto px-4 pt-12 md:pt-20 flex-grow w-full relative z-10">
         
-        {/* Search / Hero */}
+        {/* Search / Hero Section */}
         <div className={`transition-all duration-700 ease-out ${data ? 'translate-y-0 opacity-100' : 'translate-y-[5vh]'} mb-16`}>
           <div className="text-center mb-12 relative">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/30 border border-cyan-500/20 text-cyan-300 text-[10px] font-bold tracking-widest uppercase mb-6 backdrop-blur-md">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 text-[11px] font-bold tracking-widest uppercase mb-6 backdrop-blur-md shadow-lg shadow-cyan-900/20">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-              Live Downloader
+              Fast & Free
             </span>
             
-            <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight text-white drop-shadow-2xl leading-tight">
+            <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight text-white drop-shadow-2xl leading-[1.1]">
               TikToks without <br className="hidden md:block"/>
               <span className="gradient-title">Watermarks.</span>
             </h1>
             <p className="text-slate-400 text-lg md:text-xl max-w-xl mx-auto font-light leading-relaxed">
-              Paste a link to download videos, audio, and slideshows in the highest available quality.
+              Unlimited downloads for videos, slideshows, and audio. <br className="hidden md:block"/> Save your favorite content in HD.
             </p>
           </div>
 
           <div className="max-w-3xl mx-auto relative z-20">
-            <div className="glass-input rounded-3xl p-3 flex items-center gap-3 relative group shadow-2xl shadow-black/40 transition-all duration-300 hover:shadow-cyan-900/10 hover:border-cyan-500/30">
+            <div className="glass-input rounded-3xl p-2.5 md:p-3 flex items-center gap-2 md:gap-3 relative group shadow-2xl shadow-black/40 transition-all duration-300 hover:shadow-cyan-900/10 hover:border-cyan-500/30">
               <button onClick={handlePaste} className="hidden md:flex items-center justify-center w-14 h-14 rounded-2xl text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition-all" title="Paste Link">
                 <i className="fa-solid fa-paste text-xl"></i>
               </button>
               
               <input 
                 type="text" 
-                placeholder="Paste TikTok Link..." 
-                className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder-slate-500 px-3 py-4 outline-none text-lg font-medium"
+                placeholder="Paste video link here..." 
+                className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder-slate-500 px-3 py-3 md:py-4 outline-none text-base md:text-lg font-medium w-full"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleFetch()}
@@ -173,14 +185,14 @@ const App: React.FC = () => {
               <button 
                 onClick={handleFetch}
                 disabled={loading}
-                className="btn-primary text-white px-8 md:px-10 py-4 rounded-2xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 active:scale-95 shadow-lg shadow-cyan-500/20"
+                className="btn-primary text-white px-6 md:px-10 py-3 md:py-4 rounded-2xl font-bold transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-3 active:scale-95 shadow-lg shadow-cyan-500/20 shrink-0"
               >
                 {loading ? (
-                  <i className="fa-solid fa-circle-notch fa-spin text-xl"></i>
+                  <i className="fa-solid fa-circle-notch fa-spin text-lg md:text-xl"></i>
                 ) : (
                   <>
                     <span className="hidden md:inline">Download</span>
-                    <i className="fa-solid fa-arrow-right -rotate-45 text-lg"></i>
+                    <i className="fa-solid fa-arrow-right md:-rotate-45 text-lg"></i>
                   </>
                 )}
               </button>
@@ -193,7 +205,7 @@ const App: React.FC = () => {
             </div>
 
             {error && (
-              <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-200 flex items-center gap-3 animate-fade-in-up backdrop-blur-md justify-center font-medium">
+              <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-200 flex items-center gap-3 animate-fade-in-up backdrop-blur-md justify-center font-medium text-center">
                 <i className="fa-solid fa-triangle-exclamation"></i> {error}
               </div>
             )}
@@ -249,26 +261,28 @@ const App: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="flex-1 w-full">
+                  <div className="flex-1 w-full min-w-0">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
                        <div>
-                         <h2 className="text-2xl md:text-3xl font-black text-white flex items-center gap-2">
+                         <h2 className="text-2xl md:text-3xl font-black text-white flex items-center gap-2 truncate">
                           {data.author.nickname}
                           <i className="fa-solid fa-circle-check text-cyan-400 text-lg"></i>
                         </h2>
                         <div className="text-sm font-medium text-slate-400">@{data.author.unique_id}</div>
                        </div>
                        
-                       <div className="glass px-4 py-2 rounded-xl text-xs font-medium text-slate-300 flex items-center gap-2 border-white/5 self-start md:self-auto">
+                       <div className="glass px-4 py-2 rounded-xl text-xs font-medium text-slate-300 flex items-center gap-2 border-white/5 self-start md:self-auto whitespace-nowrap">
                          <i className="fa-regular fa-clock"></i> {formatDate(data.create_time || data.processed_time)}
                        </div>
                     </div>
 
-                    <div className="flex items-center gap-2 mt-4 text-xs font-semibold">
+                    <div className="flex flex-wrap items-center gap-2 mt-4 text-xs font-semibold">
                          <span className="bg-white/5 rounded-lg px-3 py-1.5 text-slate-300 border border-white/5">
+                            <i className="fa-solid fa-globe mr-1.5 text-slate-400"></i>
                             {data.region}
                          </span>
                          <span className="bg-white/5 rounded-lg px-3 py-1.5 text-slate-300 border border-white/5">
+                            <i className="fa-regular fa-hourglass mr-1.5 text-slate-400"></i>
                             {data.duration}s
                          </span>
                          <span className="bg-cyan-500/10 rounded-lg px-3 py-1.5 text-cyan-300 border border-cyan-500/20">
@@ -279,7 +293,7 @@ const App: React.FC = () => {
                 </div>
                 
                 {/* Caption */}
-                <div className="mt-6 bg-[#020617]/50 rounded-xl p-4 border border-white/5">
+                <div className="mt-6 bg-[#020617]/50 rounded-xl p-4 border border-white/5 relative group">
                     {data.title ? (
                         <div>
                             <div className="flex items-center justify-between mb-2">
@@ -288,7 +302,7 @@ const App: React.FC = () => {
                                     <i className="fa-regular fa-copy"></i> Copy
                                 </button>
                             </div>
-                            <p className="text-sm text-slate-200 leading-relaxed font-light">{data.title}</p>
+                            <p className="text-sm text-slate-200 leading-relaxed font-light max-h-32 overflow-y-auto custom-scrollbar">{data.title}</p>
                         </div>
                     ) : (
                          <p className="text-sm text-slate-400 italic">No caption provided.</p>
@@ -318,7 +332,7 @@ const App: React.FC = () => {
                         href={data.hdplay || data.play} 
                         icon="fa-video" 
                         label="HD Video" 
-                        subLabel="No Watermark (MP4)" 
+                        subLabel="No Watermark" 
                         primary={true}
                       />
                       <DownloadButton 
@@ -333,14 +347,14 @@ const App: React.FC = () => {
                   <DownloadButton 
                     href={data.music} 
                     icon="fa-music" 
-                    label="Audio" 
+                    label="Audio MP3" 
                     subLabel={data.music_info.title.length > 20 ? data.music_info.title.substring(0,20) + '...' : 'Original Sound'} 
                   />
                   
                   <DownloadButton 
                     href={data.cover} 
                     icon="fa-image" 
-                    label="Cover" 
+                    label="Cover Image" 
                     subLabel="High Quality JPG" 
                   />
                   
@@ -349,7 +363,7 @@ const App: React.FC = () => {
                        <i className="fa-solid fa-layer-group text-lg mt-0.5"></i>
                        <div>
                          <p className="font-bold">Slideshow Detected</p>
-                         <p className="opacity-80 text-xs mt-1">Download individual photos using the download buttons on the images to the left.</p>
+                         <p className="opacity-80 text-xs mt-1">Download individual photos using the download buttons overlaying the images on the left.</p>
                        </div>
                      </div>
                   )}
@@ -364,7 +378,7 @@ const App: React.FC = () => {
 
       <footer className="w-full py-8 text-center mt-auto border-t border-white/5 bg-[#020617]/80 backdrop-blur-md relative z-10">
         <p className="text-slate-500 text-sm flex items-center justify-center gap-2">
-           Credit to <span className="text-slate-300 font-medium">Shkar Faraidun</span>
+           Crafted with <i className="fa-solid fa-heart text-rose-500 animate-pulse text-xs"></i> by <span className="text-slate-300 font-medium">Shkar Faraidun</span>
         </p>
       </footer>
     </div>
