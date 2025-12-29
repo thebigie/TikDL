@@ -1,0 +1,8 @@
+{
+  "name": "TikDL - Pro TikTok Downloader",
+  "description": "A high-performance TikTok video downloader with aesthetic UI and comprehensive features.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

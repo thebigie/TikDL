@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#020617" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>TikDL - Pro Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+      
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Outfit', sans-serif;
+        background-color: #020617; /* Fallback */
+        color: #e2e8f0;
+        overflow-x: hidden;
+        selection-background-color: #22d3ee;
+        selection-color: #000;
+      }
+
+      /* Fixed Background Layer */
+      .winter-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
+        /* Richer, more visible gradient */
+        background: radial-gradient(circle at 50% -20%, #1e293b 0%, #0f172a 40%, #020617 100%);
+      }
+      
+      /* Glow Spots for aesthetics */
+      .glow-spot {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.3;
+        animation: pulse-glow 10s infinite alternate;
+      }
+      
+      @keyframes pulse-glow {
+        0% { transform: scale(1); opacity: 0.2; }
+        100% { transform: scale(1.2); opacity: 0.4; }
+      }
+
+      #root {
+        position: relative;
+        z-index: 1; /* Ensure app content sits above background */
+      }
+
+      /* Snowflakes */
+      .snowflake {
+        position: absolute;
+        top: -10px;
+        background: white;
+        border-radius: 50%;
+        pointer-events: none;
+        will-change: transform, opacity;
+        filter: blur(0.5px);
+        z-index: 1; /* In front of bg, behind content if needed, or controlled by container */
+      }
+
+      @keyframes fall {
+        0% { 
+          transform: translateY(-10px) translateX(0); 
+          opacity: 0; 
+        }
+        10% { 
+          opacity: var(--flake-opacity); 
+        }
+        90% { 
+          opacity: var(--flake-opacity); 
+        }
+        100% { 
+          transform: translateY(110vh) translateX(20px) rotate(360deg); 
+          opacity: 0; 
+        }
+      }
+
+      /* Premium Glassmorphism */
+      .glass {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .glass-panel {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      }
+
+      .glass-input {
+        background: rgba(2, 6, 23, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .glass-input:focus-within {
+        background: rgba(2, 6, 23, 0.8);
+        border-color: rgba(34, 211, 238, 0.5);
+        box-shadow: 0 0 40px rgba(34, 211, 238, 0.15);
+      }
+
+      /* Typography & Gradients */
+      .gradient-title {
+        background: linear-gradient(to right, #ffffff 20%, #22d3ee 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #0891b2 0%, #2563eb 100%);
+        box-shadow: 0 0 20px rgba(8, 145, 178, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .btn-primary:hover {
+        box-shadow: 0 0 30px rgba(37, 99, 235, 0.5);
+        transform: translateY(-1px);
+      }
+
+      /* Animations */
+      .animate-fade-in-up {
+        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@^19.2.3",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div class="winter-bg" id="snow-container">
+      <div class="glow-spot" style="top: -10%; left: -10%; width: 50vw; height: 50vw; background: #0e7490;"></div>
+      <div class="glow-spot" style="bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #4f46e5; animation-delay: -5s;"></div>
+    </div>
+    <div id="root"></div>
+    
+    <script>
+      const snowContainer = document.getElementById('snow-container');
+      
+      const createSnowflake = () => {
+        if (document.hidden) return; // Save resources when tab hidden
+        
+        const flake = document.createElement('div');
+        flake.classList.add('snowflake');
+        
+        // Aesthetics
+        const left = Math.random() * 100;
+        const size = Math.random() * 3 + 2; // 2px to 5px
+        const duration = Math.random() * 5 + 5; // 5s to 10s
+        const opacity = Math.random() * 0.5 + 0.3; // 0.3 to 0.8
+        
+        flake.style.left = `${left}vw`;
+        flake.style.width = `${size}px`;
+        flake.style.height = `${size}px`;
+        flake.style.animation = `fall ${duration}s linear forwards`;
+        flake.style.setProperty('--flake-opacity', opacity);
+        
+        snowContainer.appendChild(flake);
+        
+        // Clean up
+        setTimeout(() => {
+          flake.remove();
+        }, duration * 1000);
+      };
+
+      // Create initial batch
+      for(let i=0; i<40; i++) {
+        setTimeout(createSnowflake, Math.random() * 3000);
+      }
+      
+      // Continuous generation
+      setInterval(createSnowflake, 300);
+    </script>
+  </body>
+</html>
