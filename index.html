@@ -8,6 +8,10 @@
     <meta name="google-site-verification" content="WTCA6_tlVTGPsTdfB45ZQk2WK3_0IhdvAVAdAECgK7w" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- Custom Favicon (Gradient Download Icon) -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2306b6d4;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%233b82f6;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='256' cy='256' r='256' fill='url(%23grad)'/%3E%3Cpath d='M256 352l-128-128h80V96h96v128h80L256 352z' fill='white'/%3E%3Crect x='128' y='384' width='256' height='32' rx='16' fill='white' opacity='0.5'/%3E%3C/svg%3E" type="image/svg+xml" />
+    
     <title>TikDL - Pro Downloader</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -24,7 +28,7 @@
         -webkit-tap-highlight-color: transparent;
       }
 
-      /* Fixed Deep Space Background */
+      /* Deep Space Background */
       .winter-bg {
         position: fixed;
         top: 0;
@@ -33,20 +37,23 @@
         height: 100vh;
         z-index: 0;
         background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 40%, #020617 100%);
+        overflow: hidden;
       }
       
-      /* Ambient Glow Spots */
+      /* Dynamic Ambient Glow */
       .glow-spot {
         position: absolute;
         border-radius: 50%;
-        filter: blur(100px);
-        opacity: 0.25;
+        filter: blur(120px);
+        opacity: 0.2;
         animation: pulse-glow 15s infinite alternate ease-in-out;
+        will-change: transform, opacity;
       }
       
       @keyframes pulse-glow {
-        0% { transform: scale(1); opacity: 0.2; }
-        100% { transform: scale(1.1); opacity: 0.35; }
+        0% { transform: scale(1) translate(0, 0); opacity: 0.15; }
+        50% { opacity: 0.25; }
+        100% { transform: scale(1.1) translate(20px, -20px); opacity: 0.15; }
       }
 
       #root {
@@ -57,7 +64,131 @@
         flex-direction: column;
       }
 
-      /* Optimized Snowflakes */
+      /* Advanced Glassmorphism */
+      .glass {
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      }
+
+      .glass-panel {
+        background: linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      }
+
+      .glass-input {
+        background: rgba(2, 6, 23, 0.5);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .glass-input:focus-within {
+        background: rgba(2, 6, 23, 0.8);
+        border-color: rgba(34, 211, 238, 0.4);
+        box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.1), 0 10px 40px -10px rgba(6, 182, 212, 0.2);
+        transform: translateY(-2px);
+      }
+
+      /* Typography & Text Effects */
+      .gradient-title {
+        background: linear-gradient(135deg, #f8fafc 10%, #22d3ee 60%, #3b82f6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-size: 200% auto;
+        animation: gradient-flow 5s linear infinite;
+      }
+      
+      @keyframes gradient-flow {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; }
+      }
+
+      /* Interactive Buttons */
+      .btn-primary {
+        background: linear-gradient(135deg, #06b6d4 0%, #2563eb 100%);
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+      
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%);
+        opacity: 0;
+        z-index: -1;
+        transition: opacity 0.3s ease;
+      }
+      
+      .btn-primary:hover::before {
+        opacity: 1;
+      }
+      
+      .btn-primary:active {
+        transform: scale(0.98);
+      }
+
+      /* Animations */
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+
+      /* Staggered Entrance Animations */
+      .animate-enter {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: enter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+      
+      .delay-100 { animation-delay: 100ms; }
+      .delay-200 { animation-delay: 200ms; }
+      .delay-300 { animation-delay: 300ms; }
+
+      @keyframes enter {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      /* Shimmer Effect for Loading/Hover */
+      .shimmer {
+        position: relative;
+        overflow: hidden;
+      }
+      .shimmer::after {
+        content: '';
+        position: absolute;
+        top: 0; right: 0; bottom: 0; left: 0;
+        transform: translateX(-100%);
+        background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.05) 20%, rgba(255,255,255,0.1) 60%, rgba(255,255,255,0) 100%);
+        animation: shimmer 2s infinite;
+      }
+      
+      @keyframes shimmer {
+        100% { transform: translateX(100%); }
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+      
+      .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.3); }
+
+      /* Snowflakes */
       .snowflake {
         position: absolute;
         top: -10px;
@@ -71,85 +202,11 @@
       }
 
       @keyframes fall {
-        0% { 
-          transform: translateY(-10px) translateX(0); 
-          opacity: 0; 
-        }
-        10% { 
-          opacity: var(--flake-opacity); 
-        }
-        90% { 
-          opacity: var(--flake-opacity); 
-        }
-        100% { 
-          transform: translateY(105vh) translateX(var(--drift)) rotate(360deg); 
-          opacity: 0; 
-        }
+        0% { transform: translateY(-10px) translateX(0); opacity: 0; }
+        10% { opacity: var(--flake-opacity); }
+        90% { opacity: var(--flake-opacity); }
+        100% { transform: translateY(105vh) translateX(var(--drift)) rotate(360deg); opacity: 0; }
       }
-
-      /* Premium Glassmorphism */
-      .glass {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-      }
-
-      .glass-panel {
-        background: rgba(15, 23, 42, 0.7);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-      }
-
-      .glass-input {
-        background: rgba(2, 6, 23, 0.6);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-      
-      .glass-input:focus-within {
-        background: rgba(2, 6, 23, 0.85);
-        border-color: rgba(34, 211, 238, 0.5);
-        box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.1);
-      }
-
-      /* Typography & Utilities */
-      .gradient-title {
-        background: linear-gradient(135deg, #ffffff 30%, #22d3ee 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .btn-primary {
-        background: linear-gradient(135deg, #06b6d4 0%, #2563eb 100%);
-        box-shadow: 0 4px 20px rgba(8, 145, 178, 0.4);
-        position: relative;
-        overflow: hidden;
-      }
-      
-      .btn-primary:hover {
-        box-shadow: 0 6px 30px rgba(37, 99, 235, 0.6);
-        filter: brightness(1.1);
-      }
-
-      .animate-fade-in-up {
-        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        opacity: 0;
-        transform: translateY(20px);
-      }
-
-      @keyframes fadeInUp {
-        to { opacity: 1; transform: translateY(0); }
-      }
-
-      ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-      ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
     <script type="importmap">
     {
@@ -164,12 +221,12 @@
   </head>
   <body>
     <div class="winter-bg" id="snow-container">
-      <div class="glow-spot" style="top: -20%; left: -10%; width: 60vw; height: 60vw; background: #0891b2;"></div>
-      <div class="glow-spot" style="bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #4338ca; animation-delay: -7s;"></div>
+      <div class="glow-spot" style="top: -20%; left: -10%; width: 70vw; height: 70vw; background: #0891b2;"></div>
+      <div class="glow-spot" style="bottom: -20%; right: -10%; width: 70vw; height: 70vw; background: #4338ca; animation-delay: -7s;"></div>
+      <div class="glow-spot" style="top: 40%; left: 30%; width: 40vw; height: 40vw; background: #0ea5e9; opacity: 0.1; filter: blur(80px); animation-duration: 20s;"></div>
     </div>
     <div id="root"></div>
     
-    <!-- IMPORTANT: This script loads the React App -->
     <script type="module" src="./index.tsx"></script>
 
     <script>
@@ -188,9 +245,9 @@
         
         const left = Math.random() * 100;
         const size = Math.random() * 3 + 2;
-        const duration = Math.random() * 5 + 8; // Slower fall (8-13s)
-        const opacity = Math.random() * 0.4 + 0.2;
-        const drift = (Math.random() - 0.5) * 100; // Random drift -50px to 50px
+        const duration = Math.random() * 5 + 8;
+        const opacity = Math.random() * 0.4 + 0.1;
+        const drift = (Math.random() - 0.5) * 150;
         
         flake.style.left = `${left}vw`;
         flake.style.width = `${size}px`;
@@ -206,13 +263,11 @@
         }, duration * 1000);
       };
 
-      // Initial batch
-      for(let i=0; i<30; i++) {
+      for(let i=0; i<20; i++) {
         setTimeout(createSnowflake, Math.random() * 5000);
       }
       
-      // Continuous generation - reduced frequency for performance
-      setInterval(createSnowflake, 400);
+      setInterval(createSnowflake, 600);
     </script>
   </body>
 </html>
