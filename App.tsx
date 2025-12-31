@@ -46,33 +46,77 @@ const StatBadge = ({ icon, label, value, color }: { icon: string, label: string,
   </div>
 );
 
-const DownloadButton = ({ href, icon, label, subLabel, primary = false }: any) => (
-  <a 
-    href={href} 
-    target="_blank" 
-    rel="noreferrer"
-    className={`
-      relative group overflow-hidden rounded-2xl p-4 flex items-center gap-4 transition-all duration-300 hover:-translate-y-1
-      ${primary 
-        ? 'btn-primary text-white shadow-lg shadow-cyan-900/20' 
-        : 'glass hover:bg-white/10 text-slate-200 border-white/10 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-900/10'
-      }
-    `}
-  >
-    <div className={`
-      w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 transition-all duration-500 group-hover:scale-110
-      ${primary ? 'bg-black/20 text-white' : 'bg-white/5 text-cyan-400'}
-    `}>
-      <i className={`fa-solid ${icon}`}></i>
-    </div>
-    <div className="flex flex-col text-left z-10 min-w-0">
-      <span className="font-bold text-base tracking-wide truncate">{label}</span>
-      {subLabel && <span className={`text-xs ${primary ? 'text-cyan-50/80' : 'text-slate-400'} font-medium truncate block`}>{subLabel}</span>}
-    </div>
-    {/* Shine Effect */}
-    <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 z-0 pointer-events-none"></div>
-  </a>
-);
+interface DownloadButtonProps {
+  url: string;
+  filename: string;
+  icon: string;
+  label: string;
+  subLabel: string;
+  primary?: boolean;
+}
+
+const DownloadButton = ({ url, filename, icon, label, subLabel, primary = false }: DownloadButtonProps) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDownloading) return;
+
+    setIsDownloading(true);
+
+    try {
+      // Attempt 1: Fetch and create Blob (Instant Download)
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Fetch failed');
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (err) {
+      console.log("Direct download blocked by CORS, falling back to new tab.", err);
+      // Attempt 2: Fallback to new tab if CORS blocks fetch
+      window.open(url, '_blank');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  return (
+    <button 
+      onClick={handleDownload}
+      className={`
+        relative group overflow-hidden rounded-2xl p-4 flex items-center gap-4 transition-all duration-300 hover:-translate-y-1 w-full text-left cursor-pointer
+        ${primary 
+          ? 'btn-primary text-white shadow-lg shadow-cyan-900/20' 
+          : 'glass hover:bg-white/10 text-slate-200 border-white/10 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-900/10'
+        }
+      `}
+    >
+      <div className={`
+        w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 transition-all duration-500 group-hover:scale-110
+        ${primary ? 'bg-black/20 text-white' : 'bg-white/5 text-cyan-400'}
+      `}>
+        {isDownloading ? (
+          <i className="fa-solid fa-circle-notch fa-spin"></i>
+        ) : (
+          <i className={`fa-solid ${icon}`}></i>
+        )}
+      </div>
+      <div className="flex flex-col text-left z-10 min-w-0">
+        <span className="font-bold text-base tracking-wide truncate">{label}</span>
+        {subLabel && <span className={`text-xs ${primary ? 'text-cyan-50/80' : 'text-slate-400'} font-medium truncate block`}>{subLabel}</span>}
+      </div>
+      {/* Shine Effect */}
+      <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 z-0 pointer-events-none"></div>
+    </button>
+  );
+};
 
 const App: React.FC = () => {
   const [url, setUrl] = useState('');
@@ -124,6 +168,25 @@ const App: React.FC = () => {
   };
 
   const showToast = (msg: string) => setToast(msg);
+
+  // Generic download handler for non-component usage (like the PFP button)
+  const genericDownload = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Fetch failed');
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (e) {
+      window.open(url, '_blank');
+    }
+  };
 
   return (
     <div className="min-h-screen pb-10 relative flex flex-col font-outfit">
@@ -228,9 +291,12 @@ const App: React.FC = () => {
                         <div key={idx} className="relative group/img aspect-[9/16]">
                           <img src={img} alt={`Slide ${idx}`} className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                            <a href={img} target="_blank" rel="noreferrer" download className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/40 transition-colors">
+                            <button 
+                              onClick={() => genericDownload(img, `slide_${idx}.jpg`)}
+                              className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/40 transition-colors"
+                            >
                               <i className="fa-solid fa-download"></i>
-                            </a>
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -265,9 +331,12 @@ const App: React.FC = () => {
                       <img src={data.author.avatar} alt="Avatar" className="w-full h-full rounded-full object-cover border-4 border-[#0f172a] bg-slate-800" />
                       
                       {/* Avatar Overlay for Download */}
-                      <a href={data.author.avatar} target="_blank" rel="noreferrer" className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer backdrop-blur-sm z-20">
-                         <i className="fa-solid fa-expand text-white text-xl drop-shadow-md"></i>
-                      </a>
+                      <button 
+                        onClick={() => genericDownload(data.author.avatar, `${data.author.unique_id}_avatar.jpg`)}
+                        className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer backdrop-blur-sm z-20 border-none outline-none"
+                      >
+                         <i className="fa-solid fa-download text-white text-xl drop-shadow-md"></i>
+                      </button>
                     </div>
                   </div>
                   
@@ -282,15 +351,13 @@ const App: React.FC = () => {
                             <span className="text-sm font-medium text-slate-400">@{data.author.unique_id}</span>
                             
                             {/* Download Profile Picture Button */}
-                            <a 
-                                href={data.author.avatar} 
-                                target="_blank" 
-                                rel="noreferrer" 
-                                className="text-[10px] font-bold bg-white/5 hover:bg-white/10 text-cyan-400 border border-cyan-500/20 px-2 py-1 rounded-md transition-colors flex items-center gap-1.5"
+                            <button 
+                                onClick={() => genericDownload(data.author.avatar, `${data.author.unique_id}_avatar.jpg`)}
+                                className="text-[10px] font-bold bg-white/5 hover:bg-white/10 text-cyan-400 border border-cyan-500/20 px-2 py-1 rounded-md transition-colors flex items-center gap-1.5 cursor-pointer"
                                 title="Download Profile Picture"
                             >
                                 <i className="fa-solid fa-image"></i> PFP
-                            </a>
+                            </button>
                         </div>
                        </div>
                        
@@ -356,14 +423,16 @@ const App: React.FC = () => {
                   {!data.images && (
                     <>
                       <DownloadButton 
-                        href={data.hdplay || data.play} 
+                        url={data.hdplay || data.play}
+                        filename={`tikdl_${data.id}_hd.mp4`}
                         icon="fa-video" 
                         label="HD Video" 
                         subLabel="No Watermark" 
                         primary={true}
                       />
                       <DownloadButton 
-                        href={data.wmplay} 
+                        url={data.wmplay}
+                        filename={`tikdl_${data.id}_wm.mp4`}
                         icon="fa-brands fa-tiktok" 
                         label="Original Video" 
                         subLabel="With Watermark" 
@@ -372,14 +441,16 @@ const App: React.FC = () => {
                   )}
                   
                   <DownloadButton 
-                    href={data.music} 
+                    url={data.music}
+                    filename={`tikdl_${data.id}_music.mp3`}
                     icon="fa-music" 
                     label="Audio MP3" 
                     subLabel={data.music_info.title.length > 25 ? data.music_info.title.substring(0,25) + '...' : data.music_info.title || 'Original Sound'} 
                   />
                   
                   <DownloadButton 
-                    href={data.cover} 
+                    url={data.cover}
+                    filename={`tikdl_${data.id}_cover.jpg`}
                     icon="fa-image" 
                     label="Cover Image" 
                     subLabel="High Quality JPG" 
